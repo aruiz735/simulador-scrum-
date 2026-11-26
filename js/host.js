@@ -32,12 +32,12 @@ class ScrumHostController {
   init() {
     this.renderLobby();
     this.setupListeners();
-    this.sync.initWebRTC(this.pin, (success) => {
-      console.log('Host WebRTC status:', success);
+    this.sync.init(this.pin, (success) => {
+      console.log('Host Network status:', success);
       const statusBadge = document.getElementById('network-badge');
       if (statusBadge) {
         statusBadge.innerHTML = success 
-          ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800"><span class="w-2 h-2 mr-1.5 bg-emerald-500 rounded-full animate-pulse"></span>En línea (Multi-dispositivo WebRTC Activo)</span>'
+          ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800"><span class="w-2 h-2 mr-1.5 bg-emerald-500 rounded-full animate-pulse"></span>En línea (Cloud WebSockets Activo)</span>'
           : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800"><span class="w-2 h-2 mr-1.5 bg-amber-500 rounded-full"></span>Modo Local / Pestañas Activo</span>';
       }
     });

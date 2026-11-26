@@ -120,20 +120,28 @@ class ScrumPlayerController {
     // Listen for game events
     this.setupGameListeners();
 
-    // Connect via WebRTC (PeerJS) & BroadcastChannel
-    this.sync.connectToHost(this.pin, (success) => {
-      console.log('Player connect result:', success);
-    });
-
-    // Send join intent
-    setTimeout(() => {
+    const sendJoinPayload = () => {
       this.sync.broadcast('PLAYER_JOIN', {
         id: this.playerId,
         name: this.name,
         avatar: this.avatar
       });
-      this.showWaitingLobby();
-    }, 350);
+    };
+
+    // Connect via WebSockets & BroadcastChannel
+    this.sync.connectToHost(this.pin, (success) => {
+      console.log('Player connect result:', success);
+      if (success) {
+        sendJoinPayload();
+      }
+    });
+
+    // Send immediately (will queue if still connecting) and retry
+    sendJoinPayload();
+    setTimeout(sendJoinPayload, 1200);
+    setTimeout(sendJoinPayload, 2800);
+
+    this.showWaitingLobby();
   }
 
   setupGameListeners() {
