@@ -128,23 +128,32 @@ class ScrumPlayerController {
       });
     };
 
-    // Connect via WebSockets & BroadcastChannel
+    // Connect via Hybrid Engine
     this.sync.connectToHost(this.pin, (success) => {
       console.log('Player connect result:', success);
-      if (success) {
-        sendJoinPayload();
-      }
+      sendJoinPayload();
     });
 
-    // Send immediately (will queue if still connecting) and retry
     sendJoinPayload();
-    setTimeout(sendJoinPayload, 1200);
-    setTimeout(sendJoinPayload, 2800);
+
+    // Send heartbeat every 1.2s until host acknowledges
+    this.joinInterval = setInterval(() => {
+      if (!this.joinedConfirmed && !this.currentQuestion) {
+        sendJoinPayload();
+      } else {
+        clearInterval(this.joinInterval);
+      }
+    }, 1200);
 
     this.showWaitingLobby();
   }
 
   setupGameListeners() {
+    // Lobby update from host
+    this.sync.on('LOBBY_UPDATE', () => {
+      this.joinedConfirmed = true;
+      if (this.joinInterval) clearInterval(this.joinInterval);
+    });
     // Question starts
     this.sync.on('QUESTION_START', (payload) => {
       this.currentQuestion = payload;

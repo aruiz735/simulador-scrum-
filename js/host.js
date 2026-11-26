@@ -76,9 +76,10 @@ class ScrumHostController {
   setupListeners() {
     // Player joins
     this.sync.on('PLAYER_JOIN', (payload, senderId) => {
-      const { id, name, avatar } = payload;
+      console.log('[Host] PLAYER_JOIN event received:', payload, 'sender:', senderId);
+      const { id, name, avatar } = payload || {};
       const playerId = id || senderId;
-      if (!this.players.has(playerId)) {
+      if (playerId && !this.players.has(playerId)) {
         this.players.set(playerId, {
           id: playerId,
           name: name || `Agilista_${this.players.size + 1}`,
