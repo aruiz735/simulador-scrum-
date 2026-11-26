@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador Scrum Live (Moderador) - UNAB</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- Local self-contained dependencies -->
+  <script src="js/qrcode.min.js"></script>
+  <script src="js/peerjs.min.js"></script>
+  <script src="js/canvas-confetti.min.js"></script>
+  <!-- Question Bank -->
+  <script src="questions.js"></script>
+</head>
+<body class="h-full flex flex-col antialiased selection:bg-amber-500 selection:text-slate-950">
+
+  <!-- Top Navbar -->
+  <header class="bg-slate-900/90 border-b border-slate-800 px-6 py-3 flex items-center justify-between sticky top-0 z-50 backdrop-blur-md">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shadow-amber-500/20">
+        U
+      </div>
+      <div>
+        <h1 class="text-base font-extrabold tracking-tight text-white flex items-center gap-2">
+          UNAB Scrum Live Simulator
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-amber-400/20 text-amber-300 border border-amber-400/30">Host</span>
+        </h1>
+        <p class="text-xs text-slate-400">Maestría en Gerencia de Proyectos · Guía Scrum 2020</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <div id="network-badge">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-300">
+          Iniciando red...
+        </span>
+      </div>
+      <a href="index.html" class="text-xs font-medium text-slate-400 hover:text-white transition">
+        ← Menú Principal
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Dynamic View Container -->
+  <main class="flex-1 flex flex-col p-4 md:p-6 max-w-7xl w-full mx-auto justify-center">
+
+    <!-- VIEW 1: LOBBY -->
+    <section id="lobby-view" class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full animate-fade-in">
+      
+      <!-- Left Panel: QR, PIN and Game Controls -->
+      <div class="lg:col-span-5 flex flex-col gap-5 bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-2xl">
+        
+        <div class="text-center">
+          <span class="text-xs font-bold uppercase tracking-widest text-amber-400 block mb-1">Para Unirse a la Sesión</span>
+          <p class="text-sm text-slate-400">Escanea el código QR con tu celular o entra con el PIN:</p>
+          
+          <!-- PIN Display -->
+          <div class="mt-3 p-3 bg-slate-950 border border-amber-500/40 rounded-2xl inline-block shadow-inner">
+            <span class="text-xs text-slate-400 uppercase font-semibold block">CÓDIGO PIN</span>
+            <span id="game-pin-display" class="font-mono text-4xl md:text-5xl font-black text-amber-400 tracking-wider">------</span>
+          </div>
+        </div>
+
+        <!-- QR Code Container -->
+        <div class="flex flex-col items-center justify-center p-4 bg-white/5 border border-slate-700/50 rounded-2xl">
+          <div id="qrcode-container" class="shadow-xl"></div>
+          <p class="text-xs text-slate-400 mt-2 text-center break-all font-mono" id="join-url-display">Cargando enlace...</p>
+        </div>
+
+        <!-- Session Settings -->
+        <div class="space-y-3 bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">⚙️ Configuración de la Sesión</h3>
+          
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <label class="block font-medium text-slate-300 mb-1">Preguntas por Sesión:</label>
+              <select id="setting-qcount" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-medium focus:ring-2 focus:ring-amber-400 focus:outline-none">
+                <option value="5">5 Preguntas (Rápido)</option>
+                <option value="10" selected>10 Preguntas (Oficial UNAB)</option>
+                <option value="15">15 Preguntas (Profundo)</option>
+                <option value="20">20 Preguntas (Maratón)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-medium text-slate-300 mb-1">Tiempo por Pregunta:</label>
+              <select id="setting-time" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-medium focus:ring-2 focus:ring-amber-400 focus:outline-none">
+                <option value="20">20 segundos</option>
+                <option value="30" selected>30 segundos</option>
+                <option value="45">45 segundos</option>
+                <option value="60">60 segundos</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-medium text-slate-300 text-xs mb-1">Enfoque Temático del Banco:</label>
+            <select id="setting-area" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-medium text-xs focus:ring-2 focus:ring-amber-400 focus:outline-none">
+              <option value="ALL" selected>Todas las Áreas (Banco de 185 preguntas)</option>
+              <option value="1. Entender y aplicar el marco Scrum">1. Entender y aplicar el marco Scrum (88 q)</option>
+              <option value="2. Desarrollar personas y equipos">2. Desarrollar personas y equipos (42 q)</option>
+              <option value="3. Gestionar productos con agilidad">3. Gestionar productos con agilidad (55 q)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col gap-2 pt-1">
+          <button onclick="hostApp.startGame()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-lg shadow-xl shadow-amber-500/20 transform hover:-translate-y-0.5 active:translate-y-0 transition duration-150">
+            ¡INICIAR PARTIDA! 🚀
+          </button>
+          
+          <button onclick="hostApp.addBots(5)" class="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 border border-slate-700 transition flex items-center justify-center gap-2">
+            <span>🤖</span>
+            <span>+ Agregar 5 Estudiantes Virtuales (Bots de Prueba)</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Right Panel: Players Roster -->
+      <div class="lg:col-span-7 flex flex-col bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-2xl">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+          <div>
+            <h2 class="text-xl font-extrabold text-white">Sala de Espera (Lobby)</h2>
+            <p class="text-xs text-slate-400">Los participantes aparecerán aquí conforme se conecten</p>
+          </div>
+          <span id="players-count-badge" class="px-3 py-1 rounded-full bg-amber-400/10 text-amber-400 border border-amber-400/20 font-mono text-sm font-bold">
+            0 Participantes
+          </span>
+        </div>
+
+        <!-- Players Grid -->
+        <div id="players-grid" class="flex-1 overflow-y-auto max-h-[520px] grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 my-auto">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- VIEW 2: PRE-QUESTION COUNTDOWN -->
+    <section id="pre-countdown-view" class="hidden flex flex-col items-center justify-center text-center py-16 animate-fade-in">
+      <span id="pre-q-area" class="px-4 py-1 rounded-full bg-slate-800 text-amber-400 border border-amber-400/30 text-xs font-bold uppercase tracking-wider mb-4">
+        Marco Scrum
+      </span>
+      <h2 id="pre-q-number" class="text-3xl md:text-5xl font-black text-white mb-8">
+        Pregunta 1 de 10
+      </h2>
+      <div class="w-36 h-36 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center shadow-2xl shadow-amber-500/30 mb-6 animate-pulse">
+        <span id="pre-count-number" class="font-mono text-7xl font-black text-slate-950">3</span>
+      </div>
+      <p class="text-lg text-slate-400">¡Prepárate en tu pantalla móvil!</p>
+    </section>
+
+    <!-- VIEW 3: ACTIVE QUESTION & REVEAL -->
+    <section id="question-view" class="hidden flex flex-col gap-6 animate-fade-in w-full">
+      
+      <!-- Top Bar: Progress, Timer, Counter -->
+      <div class="flex items-center justify-between bg-slate-900/90 border border-slate-800 p-4 rounded-2xl shadow-md">
+        <div class="flex items-center gap-3">
+          <span id="q-progress-badge" class="font-mono text-sm font-bold px-3 py-1 bg-amber-400/10 text-amber-400 border border-amber-400/20 rounded-xl">
+            Pregunta 1 / 10
+          </span>
+          <span id="q-area-badge" class="hidden sm:inline-block text-xs font-semibold px-3 py-1 bg-slate-800 text-slate-300 rounded-xl">
+            Marco Scrum
+          </span>
+        </div>
+
+        <!-- Circular Countdown Timer -->
+        <div class="flex items-center gap-4">
+          <div class="relative w-14 h-14 flex items-center justify-center">
+            <svg class="w-full h-full transform -rotate-90">
+              <circle cx="28" cy="28" r="23" stroke="#334155" stroke-width="5" fill="none"></circle>
+              <circle id="q-timer-circle" cx="28" cy="28" r="23" stroke="#f59e0b" stroke-width="5" fill="none"
+                stroke-dasharray="144.5" stroke-dashoffset="0" class="transition-all duration-1000 ease-linear"></circle>
+            </svg>
+            <span id="q-timer-number" class="absolute font-mono font-black text-lg text-white">30</span>
+          </div>
+
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block font-medium">Respuestas:</span>
+            <span id="q-answered-count" class="font-mono font-black text-xl text-emerald-400">0 / 0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Question Card -->
+      <div class="bg-slate-900/95 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl text-center">
+        <h2 id="q-text-es" class="text-2xl md:text-3xl font-extrabold text-white leading-relaxed">
+          Cargando enunciado de la pregunta...
+        </h2>
+        <p id="q-text-en" class="text-sm md:text-base text-slate-400 italic mt-3 max-w-4xl mx-auto">
+          Question subtitle in English...
+        </p>
+      </div>
+
+      <!-- 4 Options Cards Grid -->
+      <div id="options-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- REVEAL / PEDAGOGICAL EXPLANATION PANEL (Initially Hidden) -->
+      <div id="reveal-explanation-panel" class="hidden flex flex-col gap-4 bg-slate-900/95 border border-slate-800 p-6 md:p-8 rounded-3xl shadow-2xl animate-fade-in">
+        
+        <div id="pedagogical-alert"></div>
+
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center text-xl shrink-0">
+            📖
+          </div>
+          <div class="flex-1">
+            <h3 class="text-base font-bold text-white mb-1">Justificación Oficial (Guía Scrum 2020):</h3>
+            <div id="explanation-text-es" class="text-sm text-slate-300 leading-relaxed space-y-2"></div>
+            <div id="explanation-text-en" class="text-xs text-slate-400 italic mt-3 border-t border-slate-800 pt-2"></div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-800 flex justify-end">
+          <button onclick="hostApp.showLeaderboard()" class="py-3 px-8 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-base shadow-xl shadow-amber-500/20 transform hover:-translate-y-0.5 transition">
+            Ver Clasificación / Leaderboard ➔
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- VIEW 4: LEADERBOARD -->
+    <section id="leaderboard-view" class="hidden flex flex-col items-center justify-center max-w-3xl w-full mx-auto animate-fade-in">
+      <div class="text-center mb-6">
+        <span class="text-xs font-bold uppercase tracking-widest text-amber-400 block mb-1">Clasificación en Tiempo Real</span>
+        <h2 class="text-3xl font-black text-white">Tabla de Posiciones</h2>
+      </div>
+
+      <!-- Ranking List -->
+      <div id="leaderboard-list" class="w-full space-y-3 mb-6">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <button id="leaderboard-next-btn" class="py-4 px-10 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-lg shadow-xl shadow-amber-500/20 transform hover:-translate-y-0.5 transition">
+        Siguiente Pregunta ➔
+      </button>
+    </section>
+
+    <!-- VIEW 5: PODIUM (GAME OVER) -->
+    <section id="podium-view" class="hidden flex flex-col items-center justify-center w-full animate-fade-in py-6">
+      
+      <div class="text-center mb-8">
+        <span class="text-xs font-bold uppercase tracking-widest text-amber-400 block mb-1">Fin de la Simulación Oficial</span>
+        <h2 class="text-3xl md:text-5xl font-black text-white">🏆 Podio de Campeones Agilistas 🏆</h2>
+        <p class="text-sm text-slate-400 mt-2">Maestría en Gerencia de Proyectos - UNAB</p>
+      </div>
+
+      <!-- 3D Olympic Podium Steps -->
+      <div class="flex items-end justify-center gap-4 w-full max-w-2xl mb-12 px-4">
+        
+        <!-- 2nd Place (Silver) -->
+        <div class="flex-1 flex flex-col items-center">
+          <div class="text-4xl mb-2 animate-bounce">🥈</div>
+          <div id="podium-2-avatar" class="text-3xl mb-1">🦊</div>
+          <p id="podium-2-name" class="font-bold text-white text-sm md:text-base truncate max-w-[140px]">-</p>
+          <span id="podium-2-score" class="font-mono text-xs text-amber-400 font-bold mb-2">0 pts</span>
+          <div class="podium-step-2 w-full rounded-t-2xl flex items-center justify-center text-4xl font-black text-slate-900 shadow-xl">
+            2
+          </div>
+        </div>
+
+        <!-- 1st Place (Gold) -->
+        <div class="flex-1 flex flex-col items-center -mt-6">
+          <div class="text-5xl mb-2 animate-bounce">👑</div>
+          <div id="podium-1-avatar" class="text-4xl mb-1">🦁</div>
+          <p id="podium-1-name" class="font-black text-amber-300 text-base md:text-lg truncate max-w-[160px]">-</p>
+          <span id="podium-1-score" class="font-mono text-sm text-amber-400 font-black mb-2">0 pts</span>
+          <div class="podium-step-1 w-full rounded-t-2xl flex items-center justify-center text-6xl font-black text-slate-950 shadow-2xl">
+            1
+          </div>
+        </div>
+
+        <!-- 3rd Place (Bronze) -->
+        <div class="flex-1 flex flex-col items-center">
+          <div class="text-4xl mb-2 animate-bounce">🥉</div>
+          <div id="podium-3-avatar" class="text-3xl mb-1">⚡</div>
+          <p id="podium-3-name" class="font-bold text-white text-sm md:text-base truncate max-w-[140px]">-</p>
+          <span id="podium-3-score" class="font-mono text-xs text-amber-400 font-bold mb-2">0 pts</span>
+          <div class="podium-step-3 w-full rounded-t-2xl flex items-center justify-center text-4xl font-black text-slate-900 shadow-xl">
+            3
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Full Results Table -->
+      <div class="w-full max-w-4xl bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl mb-8">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+          <h3 class="text-lg font-bold text-white">Detalle de Calificaciones del Curso</h3>
+          <button onclick="hostApp.exportCSV()" class="py-2 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center gap-2 shadow-lg">
+            <span>📥</span>
+            <span>Descargar Reporte (Excel / CSV)</span>
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm text-slate-300">
+            <thead class="bg-slate-950 text-xs uppercase text-slate-400 font-mono">
+              <tr>
+                <th class="px-4 py-3 rounded-l-lg">Puesto</th>
+                <th class="px-4 py-3">Estudiante</th>
+                <th class="px-4 py-3 text-center">Aciertos</th>
+                <th class="px-4 py-3 text-center">Efectividad</th>
+                <th class="px-4 py-3 text-right rounded-r-lg">Puntaje</th>
+              </tr>
+            </thead>
+            <tbody id="full-ranking-tbody">
+              <!-- Dynamically rendered -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <button onclick="window.location.reload()" class="py-3 px-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm border border-slate-700 transition">
+        🔄 Iniciar Nueva Sesión
+      </button>
+
+    </section>
+
+  </main>
+
+  <!-- Host Controller Logic -->
+  <script src="js/engine.js"></script>
+  <script src="js/host.js"></script>
+</body>
+</html>

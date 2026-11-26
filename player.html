@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Participante - UNAB Scrum Live</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- Local self-contained dependencies -->
+  <script src="js/peerjs.min.js"></script>
+</head>
+<body class="h-full flex flex-col justify-between antialiased selection:bg-amber-500 selection:text-slate-950">
+
+  <!-- Top Navigation Bar -->
+  <header class="bg-slate-900/90 border-b border-slate-800 px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-50 backdrop-blur-md">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-black text-slate-950 text-lg shadow-md">
+        U
+      </div>
+      <div>
+        <h1 class="text-sm font-extrabold tracking-tight text-white flex items-center gap-2">
+          UNAB Scrum Live
+          <span id="player-status-badge" class="text-[10px] font-bold px-2 py-0.2 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30">Player</span>
+        </h1>
+        <p class="text-[11px] text-slate-400 hidden sm:block">Maestría en Gerencia de Proyectos</p>
+      </div>
+    </div>
+
+    <!-- Right Controls: Language toggle & User profile -->
+    <div class="flex items-center gap-2 sm:gap-4">
+      <div id="player-profile-pill" class="hidden items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-xs font-bold text-slate-200">
+        <span id="header-avatar">🦊</span>
+        <span id="header-name" class="max-w-[100px] truncate">Jugador</span>
+        <span id="header-score" class="ml-1 font-mono text-amber-400 font-black">0 pts</span>
+      </div>
+
+      <button id="btn-lang-toggle" onclick="playerApp.toggleLanguage()" class="px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-xs font-bold text-amber-300 border border-slate-700 transition">
+        🌐 ES (Cambiar a EN)
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 flex flex-col justify-center p-3 sm:p-6 max-w-5xl w-full mx-auto">
+
+    <!-- VIEW 1: JOIN SCREEN -->
+    <section id="view-join" class="max-w-md w-full mx-auto space-y-4 animate-fade-in my-auto">
+      <div class="text-center">
+        <span class="text-xs font-bold uppercase tracking-widest text-amber-400 block mb-1">Evaluación en Vivo</span>
+        <h1 class="text-2xl sm:text-3xl font-black text-white">Unirse a la Partida</h1>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">Ingresa el PIN proyectado por el facilitador</p>
+      </div>
+
+      <div class="space-y-4 bg-slate-900/90 border border-slate-800 p-6 rounded-3xl shadow-2xl">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">CÓDIGO PIN:</label>
+          <input id="input-pin" type="tel" maxlength="6" placeholder="Ej: 582194"
+            class="w-full text-center font-mono font-black text-3xl tracking-widest p-3 bg-slate-950 border border-slate-700 rounded-2xl text-amber-400 focus:ring-2 focus:ring-amber-400 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">TU NOMBRE O ALIAS:</label>
+          <input id="input-name" type="text" maxlength="24" placeholder="Ej: Carlos Gómez"
+            class="w-full text-center font-bold text-base p-3 bg-slate-950 border border-slate-700 rounded-2xl text-white focus:ring-2 focus:ring-amber-400 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">ELIGE TU AVATAR:</label>
+          <div id="avatar-picker" class="grid grid-cols-6 gap-2">
+            <!-- Dynamic emojis -->
+          </div>
+        </div>
+
+        <button id="btn-join-game" class="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-lg shadow-xl shadow-amber-500/20 active:scale-95 transition">
+          ¡ENTRAR A LA SALA! 🚀
+        </button>
+
+        <p id="join-status-msg" class="text-center text-xs text-amber-400 font-mono"></p>
+      </div>
+    </section>
+
+    <!-- VIEW 2: LOBBY WAIT SCREEN -->
+    <section id="view-lobby-wait" class="hidden text-center space-y-6 animate-fade-in my-auto max-w-md w-full mx-auto">
+      <div class="inline-block p-6 rounded-full bg-slate-900 border-2 border-amber-500/40 shadow-2xl animate-pulse">
+        <span id="lobby-wait-avatar" class="text-6xl block">🦊</span>
+      </div>
+      <div>
+        <h2 id="lobby-wait-name" class="text-2xl sm:text-3xl font-black text-white">Carlos</h2>
+        <span id="lobby-wait-pin" class="font-mono text-xs text-amber-400 font-bold block mt-1">SALA PIN: ------</span>
+      </div>
+      <div class="p-5 bg-slate-900/90 border border-slate-800 rounded-2xl shadow-xl">
+        <div class="w-3.5 h-3.5 bg-emerald-400 rounded-full animate-ping mx-auto mb-3"></div>
+        <p class="text-base font-bold text-white">¡Conectado exitosamente!</p>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">Observa la pantalla principal del facilitador. Las preguntas aparecerán simultáneamente aquí en tu dispositivo.</p>
+      </div>
+    </section>
+
+    <!-- VIEW 3: ACTIVE QUESTION & REVEAL (IDENTICAL TO MODERATOR LAYOUT) -->
+    <section id="view-active-question" class="hidden flex flex-col gap-4 animate-fade-in w-full">
+      
+      <!-- Top Info Bar: Progress, Area, Timer, Answer Status -->
+      <div class="flex items-center justify-between bg-slate-900/90 border border-slate-800 p-3 sm:p-4 rounded-2xl shadow-md">
+        <div class="flex items-center gap-2 sm:gap-3">
+          <span id="player-q-progress" class="font-mono text-xs sm:text-sm font-bold px-2.5 sm:px-3 py-1 bg-amber-400/10 text-amber-400 border border-amber-400/20 rounded-xl">
+            Pregunta 1 / 10
+          </span>
+          <span id="player-q-area" class="text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-1 bg-slate-800 text-slate-300 rounded-xl truncate max-w-[150px] sm:max-w-none">
+            Marco Scrum
+          </span>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <!-- Circular Countdown Timer -->
+          <div class="relative w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center">
+            <svg class="w-full h-full transform -rotate-90">
+              <circle cx="24" cy="24" r="19" stroke="#334155" stroke-width="4" fill="none"></circle>
+              <circle id="player-timer-circle" cx="24" cy="24" r="19" stroke="#f59e0b" stroke-width="4" fill="none"
+                stroke-dasharray="119.38" stroke-dashoffset="0" class="transition-all duration-1000 ease-linear"></circle>
+            </svg>
+            <span id="player-timer-number" class="absolute font-mono font-black text-sm sm:text-base text-white">30</span>
+          </div>
+
+          <div id="player-answer-status" class="hidden sm:block text-right">
+            <span class="text-[10px] text-slate-400 block font-semibold">Tu Estado:</span>
+            <span id="player-status-text" class="text-xs font-bold text-amber-400 font-mono">Pendiente</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Question Card (Formatted identically to Moderator) -->
+      <div class="bg-slate-900/95 border border-slate-800 rounded-3xl p-5 sm:p-7 shadow-2xl text-center">
+        <h2 id="player-q-text-es" class="text-lg sm:text-2xl md:text-3xl font-extrabold text-white leading-relaxed">
+          Cargando enunciado de la pregunta...
+        </h2>
+        <p id="player-q-text-en" class="text-xs sm:text-sm md:text-base text-slate-400 italic mt-2.5 max-w-3xl mx-auto">
+          Question text in English...
+        </p>
+      </div>
+
+      <!-- 4 Options Cards Grid (2x2 Grid exactly as Moderator) -->
+      <div id="player-options-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- FEEDBACK & PEDAGOGICAL RETROALIMENTACIÓN PANEL (Revealed on Question End) -->
+      <div id="player-feedback-panel" class="hidden flex flex-col gap-4 bg-slate-900/95 border border-slate-800 p-5 sm:p-7 rounded-3xl shadow-2xl animate-fade-in mt-1">
+        
+        <!-- Result Banner (Correct / Incorrect) -->
+        <div id="player-result-banner" class="p-4 rounded-2xl flex items-center justify-between text-white shadow-xl">
+          <div class="flex items-center gap-3">
+            <span id="player-result-icon" class="text-3xl">🎉</span>
+            <div>
+              <h3 id="player-result-title" class="text-base sm:text-lg font-black">¡RESPUESTA CORRECTA!</h3>
+              <p id="player-result-subtitle" class="text-xs text-white/80">Has sumado puntos para la clasificación.</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span id="player-points-awarded" class="font-mono font-black text-lg sm:text-xl block">+0 PTS</span>
+            <span id="player-streak-badge" class="text-[10px] font-bold uppercase tracking-wider block text-white/80"></span>
+          </div>
+        </div>
+
+        <!-- Optional Pedagogical Alert Box (Trampa de Examen) -->
+        <div id="player-pedagogical-alert"></div>
+
+        <!-- Official Justification (Scrum Guide 2020) -->
+        <div class="flex items-start gap-3 sm:gap-4 bg-slate-950/70 p-4 sm:p-5 rounded-2xl border border-slate-800">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center text-xl shrink-0">
+            📖
+          </div>
+          <div class="flex-1">
+            <h4 class="text-xs sm:text-sm font-bold text-white mb-1">Retroalimentación Oficial (Guía Scrum 2020):</h4>
+            <div id="player-explanation-es" class="text-xs sm:text-sm text-slate-300 leading-relaxed space-y-1.5"></div>
+            <div id="player-explanation-en" class="text-[11px] sm:text-xs text-slate-400 italic mt-2.5 border-t border-slate-800/80 pt-2"></div>
+          </div>
+        </div>
+
+        <!-- Waiting Indicator for Next Question -->
+        <div class="flex items-center justify-center gap-2 text-xs font-medium text-slate-400 py-1">
+          <div class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></div>
+          <span>Esperando que el moderador avance a la siguiente pregunta...</span>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- VIEW 4: GAME OVER (FINAL PODIUM SUMMARY) -->
+    <section id="view-gameover" class="hidden text-center space-y-6 animate-fade-in my-auto max-w-md w-full mx-auto">
+      <div class="text-6xl animate-bounce">🏆</div>
+      <div>
+        <span id="gameover-avatar" class="text-4xl block mb-2">🦊</span>
+        <h2 class="text-2xl sm:text-3xl font-black text-white">¡Partida Completada!</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">Has finalizado las 10 preguntas del simulador</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 bg-slate-900 border border-slate-800 p-5 rounded-3xl shadow-xl">
+        <div>
+          <span class="text-xs text-slate-400 block font-semibold">PUNTAJE FINAL:</span>
+          <span id="gameover-score" class="font-mono text-2xl font-black text-amber-400">0 PTS</span>
+        </div>
+        <div>
+          <span class="text-xs text-slate-400 block font-semibold">POSICIÓN:</span>
+          <span id="gameover-rank" class="font-mono text-2xl font-black text-white">#--</span>
+        </div>
+      </div>
+
+      <div class="p-4 bg-slate-900/60 border border-slate-800 rounded-2xl text-xs text-slate-400">
+        Revisa la pantalla principal para ver el <strong>Podio de Campeones</strong> y la descarga de calificaciones oficiales.
+      </div>
+
+      <button onclick="window.location.reload()" class="w-full py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 border border-slate-700 transition">
+        Jugar Otra Partida
+      </button>
+    </section>
+
+  </main>
+
+  <footer class="text-center py-3 text-xs text-slate-500 font-mono border-t border-slate-900">
+    Universidad Autónoma de Bucaramanga · PSM I Live
+  </footer>
+
+  <!-- Player Controller Logic -->
+  <script src="js/engine.js"></script>
+  <script src="js/player.js"></script>
+</body>
+</html>
